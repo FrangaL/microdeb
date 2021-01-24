@@ -1,3 +1,3 @@
-# microdeb
+# Debian slim versions for dockers
 
-Debian slim versions
+Debian slim versions for dockers
