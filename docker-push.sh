@@ -23,7 +23,6 @@ for architecture in $ARCHS; do
 done
 
 if [ -n "$CI_JOB_TOKEN" ]; then
-  set -x
   IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "$DOCKER_HUB_ORGANIZATION" | tr '\n' ' ')
   # shellcheck disable=SC2086
   docker manifest create "$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest" $IMAGES
@@ -31,5 +30,4 @@ if [ -n "$CI_JOB_TOKEN" ]; then
   for img in $IMAGES; do
     docker rmi "$img"
   done
-  set +x
 fi
