@@ -15,7 +15,7 @@ for architecture in $ARCHS; do
     echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
     docker tag "$CI_REGISTRY_IMAGE/${IMAGE}:$VERSION" "$DOCKER_HUB_ORGANIZATION/${IMAGE}:$architecture"
     docker push "$DOCKER_HUB_ORGANIZATION/${IMAGE}:$architecture"
-
+    docker rmi "$CI_REGISTRY_IMAGE/${IMAGE}:$VERSION"
   else
     docker tag "$CI_REGISTRY_IMAGE/$IMAGE:$VERSION" "$CI_REGISTRY_IMAGE/$IMAGE:latest"
   fi
