@@ -18,7 +18,7 @@ build-rootfs:
         paths:
             - "*.tar.xz"
     rules:
-        - if: '$DOCKER_HUB_USER =~ /.+/ && $DOCKER_HUB_ACCESS_TOKEN =~ /.+/'
+        - if: '$DOCKER_HUB_USER =~ /.+/ && $DOCKER_HUB_ACCESS_TOKEN =~ /.+/ && $DOCKER_HUB_PASS =~ /.+/'
           when: on_success
     script: |
         set -e
@@ -104,4 +104,25 @@ push-docker-images:
         # Clean tags.
         for distro in $BASE_DISTROS; do
           ./docker-cleanup.sh $distro
+        done
+        #
+        # Update README and short description.
+        # Short Description
+        buster_short="Debian Buster slim version for docker"
+        bullseye_short="Debian Bullseye slim version for docker"
+        sid_short="Debian Sid slim version for docker"
+        for distro in $BASE_DISTROS; do
+          case "$distro" in
+            buster) SHORT=$buster_short ;;
+            bullseye) SHORT=$bullseye_short ;;
+            sid) SHORT=$sid_short ;;
+          esac
+          docker run --rm \
+            -v "$(pwd)"/README.md:/data/README.md \
+            -e DOCKERHUB_USERNAME="$DOCKER_HUB_USER" \
+            -e DOCKERHUB_PASSWORD="$DOCKER_HUB_PASS" \
+            -e DOCKERHUB_REPO_PREFIX="$DOCKER_HUB_ORGANIZATION" \
+            -e DOCKERHUB_REPO_NAME="$distro" \
+            -e SHORT_DESCRIPTION="$SHORT" \
+            frangal/readme-dockerhub
         done
