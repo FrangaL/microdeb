@@ -26,7 +26,7 @@ if [ -n "$CI_JOB_TOKEN" ]; then
   IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "$DOCKER_HUB_ORGANIZATION" | tr '\n' ' ')
   # shellcheck disable=SC2086
   docker manifest create "$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest" $IMAGES
-  docker manifest push -p "$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest"
+  docker manifest push -p "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest"
   for img in $IMAGES; do
     docker rmi "$img"
   done
