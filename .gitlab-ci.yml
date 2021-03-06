@@ -12,7 +12,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: microdeb/buster
+    image: microdeb/bullseye
     artifacts:
         paths:
             - "*.tar.xz"
