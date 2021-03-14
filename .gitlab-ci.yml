@@ -12,7 +12,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: debian:testing
+    image: debian:buster
     artifacts:
         paths:
             - "*.tar.xz"
