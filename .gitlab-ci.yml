@@ -12,7 +12,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: ubuntu:latest
+    image: ubuntu:bionic
     artifacts:
         paths:
             - "*.tar.xz"
