@@ -55,13 +55,13 @@ EOF
 exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
-  mount -t proc none "$WORK_DIR"/proc
-  mount -t sysfs none "$WORK_DIR"/sys
-  mount -t devpts pts "$WORK_DIR"/dev/pts/
+  mount -t proc none "$WORK_DIR"/proc || true
+  mount -t sysfs none "$WORK_DIR"/sys || true
+  mount -t devpts pts "$WORK_DIR"/dev/pts/ || true
   chroot "$WORK_DIR" /debootstrap/debootstrap --second-stage
-  umount "$WORK_DIR"/proc
-  umount "$WORK_DIR"/sys
-  umount "$WORK_DIR"/dev/pts/
+  umount "$WORK_DIR"/proc || true
+  umount "$WORK_DIR"/sys || true
+  umount "$WORK_DIR"/dev/pts/ || true
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
   rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
