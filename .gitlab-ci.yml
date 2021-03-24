@@ -12,7 +12,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: ubuntu:bionic
+    image: debian:testing
     artifacts:
         paths:
             - "*.tar.xz"

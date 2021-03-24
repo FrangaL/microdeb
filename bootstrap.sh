@@ -9,8 +9,13 @@ for ARCHITECTURE in $ARCHS; do
   rm -rf "$ARCHITECTURE" || true
   mkdir -p "$ARCHITECTURE"
 
-  qemu-debootstrap --variant=minbase --components=main,contrib,non-free \
-    --include="libc-bin" --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
+  debootstrap --foreign --variant=minbase --components=main,contrib,non-free \
+    --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
+
+  case ${ARCHITECTURE} in
+    arm64) QEMU_BIN="/usr/bin/qemu-aarch64-static" ;;
+    armhf) QEMU_BIN="/usr/bin/qemu-arm-static" ;;
+  esac
 
   echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
   echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
@@ -45,6 +50,9 @@ EOF
 exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
+
+  cp $QEMU_BIN "$WORK_DIR"/usr/bin/
+  chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
   rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
