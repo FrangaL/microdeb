@@ -13,8 +13,13 @@ for ARCHITECTURE in $ARCHS; do
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
   case ${ARCHITECTURE} in
-    arm64) QEMU_BIN="/usr/bin/qemu-aarch64-static" ;;
-    armhf) QEMU_BIN="/usr/bin/qemu-arm-static" ;;
+    arm64) QEMU_BIN="/usr/bin/qemu-aarch64-static"
+    mkdir -p "$WORK_DIR"/usr/bin/
+    cp $QEMU_BIN "$WORK_DIR"/usr/bin/ ;;
+    armhf) QEMU_BIN="/usr/bin/qemu-arm-static"
+    mkdir -p "$WORK_DIR"/usr/bin/
+    cp $QEMU_BIN "$WORK_DIR"/usr/bin/ ;;
+    *) break ;;
   esac
 
   echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
@@ -51,8 +56,6 @@ exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
-  mkdir -p "$WORK_DIR"/usr/bin/
-  cp $QEMU_BIN "$WORK_DIR"/usr/bin/
   chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
