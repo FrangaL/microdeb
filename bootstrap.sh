@@ -56,7 +56,7 @@ exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
-  chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
+  chroot "$WORK_DIR" /debootstrap/debootstrap --second-stage
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
   rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
