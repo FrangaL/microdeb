@@ -51,6 +51,7 @@ exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
+  mkdir -p "$WORK_DIR"/usr/bin/
   cp $QEMU_BIN "$WORK_DIR"/usr/bin/
   chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
 
