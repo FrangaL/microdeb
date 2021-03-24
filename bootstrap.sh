@@ -19,7 +19,7 @@ for ARCHITECTURE in $ARCHS; do
     armhf) QEMU_BIN="/usr/bin/qemu-arm-static"
     mkdir -p "$WORK_DIR"/usr/bin/
     cp $QEMU_BIN "$WORK_DIR"/usr/bin/ ;;
-    *) break ;;
+    *) echo "" ;;
   esac
 
   echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
