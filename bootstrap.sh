@@ -56,8 +56,8 @@ exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
-  mount -t proc none "$WORK_DIR"/proc || true
-  mount -t sysfs none "$WORK_DIR"/sys || true
+  #mount -t proc none "$WORK_DIR"/proc || true
+  #mount -t sysfs none "$WORK_DIR"/sys || true
   mount -t devpts pts "$WORK_DIR"/dev/pts/ || true
 
   on_chroot() {
@@ -66,8 +66,8 @@ EOF
 
   on_chroot /debootstrap/debootstrap --second-stage
 
-  umount "$WORK_DIR"/proc || true
-  umount "$WORK_DIR"/sys || true
+  #umount "$WORK_DIR"/proc || true
+  #umount "$WORK_DIR"/sys || true
   umount "$WORK_DIR"/dev/pts/ || true
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
