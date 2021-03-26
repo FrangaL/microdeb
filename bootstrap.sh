@@ -60,7 +60,11 @@ EOF
   mount -t sysfs none "$WORK_DIR"/sys || true
   mount -t devpts pts "$WORK_DIR"/dev/pts/ || true
 
-  chroot "$WORK_DIR" /debootstrap/debootstrap --second-stage
+  on_chroot() {
+    LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
+  }
+
+  on_chroot /debootstrap/debootstrap --second-stage
 
   umount "$WORK_DIR"/proc || true
   umount "$WORK_DIR"/sys || true
