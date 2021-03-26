@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -ex
 
 DISTRO=$1
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
