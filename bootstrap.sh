@@ -1,4 +1,4 @@
-#!/bin/bash -xe
+#!/bin/bash -e
 
 DISTRO=$1
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
@@ -12,15 +12,15 @@ for ARCHITECTURE in $ARCHS; do
   debootstrap --foreign --variant=minbase --components=main,contrib,non-free \
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
-  case ${ARCHITECTURE} in
-    arm64) QEMU_BIN="/usr/bin/qemu-aarch64-static"
+  if [ "${ARCHITECTURE}" = "arm64" ]; then
+    QEMU_BIN="/usr/bin/qemu-aarch64-static"
     mkdir -p "$WORK_DIR"/usr/bin/
-    cp $QEMU_BIN "$WORK_DIR"/usr/bin/ ;;
-    armhf) QEMU_BIN="/usr/bin/qemu-arm-static"
+    cp $QEMU_BIN "$WORK_DIR"/usr/bin/
+  elif [ "${ARCHITECTURE}" = "armhf" ]; then
+    QEMU_BIN="/usr/bin/qemu-arm-static"
     mkdir -p "$WORK_DIR"/usr/bin/
-    cp $QEMU_BIN "$WORK_DIR"/usr/bin/ ;;
-    *) echo "" ;;
-  esac
+    cp $QEMU_BIN "$WORK_DIR"/usr/bin/
+  fi
 
   echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
   echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
@@ -55,10 +55,13 @@ EOF
 exit 101
 EOF
   chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
+
   mount -t proc none "$WORK_DIR"/proc || true
   mount -t sysfs none "$WORK_DIR"/sys || true
   mount -t devpts pts "$WORK_DIR"/dev/pts/ || true
+
   chroot "$WORK_DIR" /debootstrap/debootstrap --second-stage
+
   umount "$WORK_DIR"/proc || true
   umount "$WORK_DIR"/sys || true
   umount "$WORK_DIR"/dev/pts/ || true
