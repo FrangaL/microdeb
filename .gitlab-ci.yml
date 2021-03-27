@@ -27,7 +27,9 @@ build-rootfs:
         # Enable support for additional executable binary formats
         update-binfmts --enable
         for distro in $BASE_DISTROS; do
-            ./bootstrap.sh $distro
+          for arch in $ARCHS; do
+            ./bootstrap.sh $distro $arch
+          done
         done
 
 build-docker-images:
@@ -97,18 +99,18 @@ push-docker-images:
         set -e
         apk update
         apk add curl jq gawk
-        # Push images Docker Hub
+        # Push images Docker Hub.
         for distro in $BASE_DISTROS; do
             ./docker-push.sh $distro
         done
         #
-        # Clean tags.
+        # Clean tags Docker Hub.
         for distro in $BASE_DISTROS; do
           ./docker-cleanup.sh $distro
         done
         #
-        # Update README and short description.
-        # Short Description
+        # Update README and short description Docker Hub.
+        # Short Description:
         buster_short="Debian Buster slim version for docker"
         bullseye_short="Debian Bullseye slim version for docker"
         sid_short="Debian Sid slim version for docker"
