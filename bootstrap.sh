@@ -2,17 +2,22 @@
 
 DISTRO=$1
 ARCHITECTURE=$2
-EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 MIRROR=${3:-http://deb.debian.org/debian}
 WORK_DIR="$ARCHITECTURE/$DISTRO"
+EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 
 rm -rf "$ARCHITECTURE" || true
 mkdir -p "$ARCHITECTURE"
+
+echo "========================================"
+echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
+echo "========================================"
 
 debootstrap --variant=minbase --components=main,contrib,non-free \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
+echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
 
 aptGetClean='"rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true";'
 cat >"$WORK_DIR/etc/apt/apt.conf.d/docker-clean" <<-EOF
@@ -47,16 +52,6 @@ EOF
 
 chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
-# on_chroot() {
-#   LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
-# }
-#
-# sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
-#
-# on_chroot /debootstrap/debootstrap --second-stage
-
-echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
-
 rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
 rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
 rm -rf "$WORK_DIR"/var/cache/apt/*.bin || true
@@ -71,4 +66,5 @@ find "$WORK_DIR"/usr/share/doc -depth -type f ! -name copyright -print0 | xargs 
 find "$WORK_DIR"/usr/share/doc -empty -print0 | xargs -0 rmdir
 mkdir -p "$WORK_DIR"/var/lib/apt/lists/partial
 
+echo "Creating $ARCHITECTURE.$DISTRO.minbase.tar.xz ..."
 tar -I 'pixz -1' -C "$WORK_DIR" -pcf "$ARCHITECTURE"."$DISTRO".minbase.tar.xz .
