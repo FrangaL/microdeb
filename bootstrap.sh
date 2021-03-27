@@ -3,7 +3,7 @@
 DISTRO=$1
 ARCHITECTURE=$2
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
-MIRROR=${2:-http://deb.debian.org/debian}
+MIRROR=${3:-http://deb.debian.org/debian}
 WORK_DIR="$ARCHITECTURE/$DISTRO"
 
 rm -rf "$ARCHITECTURE" || true
