@@ -60,7 +60,7 @@ EOF
     LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
   }
 
-  sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/usr/share/debootstrap/functions
+  sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
   mount -t proc proc "$(pwd)/$WORK_DIR"/proc || true
   on_chroot /debootstrap/debootstrap --second-stage
   umount "$(pwd)/$WORK_DIR"/proc || true
