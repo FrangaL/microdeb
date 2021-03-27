@@ -12,18 +12,7 @@ for ARCHITECTURE in $ARCHS; do
   debootstrap --foreign --variant=minbase --components=main,contrib,non-free \
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
-  # if [ "${ARCHITECTURE}" = "arm64" ]; then
-  #   QEMU_BIN="/usr/bin/qemu-aarch64-static"
-  #   mkdir -p "$WORK_DIR"/usr/bin/
-  #   cp $QEMU_BIN "$WORK_DIR"/usr/bin/
-  # elif [ "${ARCHITECTURE}" = "armhf" ]; then
-  #   QEMU_BIN="/usr/bin/qemu-arm-static"
-  #   mkdir -p "$WORK_DIR"/usr/bin/
-  #   cp $QEMU_BIN "$WORK_DIR"/usr/bin/
-  # fi
-
   echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
-  echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
 
   aptGetClean='"rm -f /var/cache/apt/archives/*.deb /var/cache/apt/archives/partial/*.deb /var/cache/apt/*.bin || true";'
   cat >"$WORK_DIR/etc/apt/apt.conf.d/docker-clean" <<-EOF
@@ -61,9 +50,10 @@ EOF
   }
 
   sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
-  mount -t proc none "$(pwd)/$WORK_DIR"/proc || true
+
   on_chroot /debootstrap/debootstrap --second-stage
-  umount "$(pwd)/$WORK_DIR"/proc || true
+
+  echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
   rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
