@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/bin/bash -eu
 
 DISTRO=$1
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
@@ -60,7 +60,10 @@ EOF
     LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
   }
 
+  sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/usr/share/debootstrap/functions
+  mount -t proc proc "$(pwd)/$WORK_DIR"/proc || true
   on_chroot /debootstrap/debootstrap --second-stage
+  umount "$(pwd)/$WORK_DIR"/proc || true
 
   rm -rf "$WORK_DIR"/usr/bin/qemu-* || true
   rm -rf "$WORK_DIR"/var/lib/apt/lists/* || true
