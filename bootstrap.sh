@@ -9,7 +9,7 @@ WORK_DIR="$ARCHITECTURE/$DISTRO"
 rm -rf "$ARCHITECTURE" || true
 mkdir -p "$ARCHITECTURE"
 
-debootstrap --foreign --variant=minbase --components=main,contrib,non-free \
+debootstrap --variant=minbase --components=main,contrib,non-free \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
@@ -47,13 +47,13 @@ EOF
 
 chmod +x "$WORK_DIR/usr/sbin/policy-rc.d"
 
-on_chroot() {
-  LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
-}
-
-sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
-
-on_chroot /debootstrap/debootstrap --second-stage
+# on_chroot() {
+#   LC_ALL=C setarch "$(arch)" capsh --drop=cap_setfcap "--chroot=$WORK_DIR/" -- -e "$@"
+# }
+#
+# sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
+#
+# on_chroot /debootstrap/debootstrap --second-stage
 
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
 
