@@ -61,7 +61,7 @@ EOF
   }
 
   sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' "$WORK_DIR"/debootstrap/functions
-  mount -t proc proc "$(pwd)/$WORK_DIR"/proc || true
+  mount -t proc none "$(pwd)/$WORK_DIR"/proc || true
   on_chroot /debootstrap/debootstrap --second-stage
   umount "$(pwd)/$WORK_DIR"/proc || true
 
