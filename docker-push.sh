@@ -8,16 +8,16 @@ for architecture in $ARCHS; do
  . ./"${architecture}"-"${DISTRO}".conf
 
   if [ -n "$CI_JOB_TOKEN" ]; then
-    echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
-    docker pull "$CI_REGISTRY_IMAGE/${IMAGE:=}:$VERSION"
+    #echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+    docker pull "$CI_REGISTRY_IMAGE/${IMAGE:=}:$TAG"
 
-    DOCKER_HUB_REGISTRY="docker.io"
-    echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
-    docker tag "$CI_REGISTRY_IMAGE/${IMAGE}:$VERSION" "$DOCKER_HUB_ORGANIZATION/${IMAGE}:$architecture"
+    #DOCKER_HUB_REGISTRY="docker.io"
+    #echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
+    docker tag "$CI_REGISTRY_IMAGE/${IMAGE}:$TAG" "$DOCKER_HUB_ORGANIZATION/${IMAGE}:$architecture"
     docker push "$DOCKER_HUB_ORGANIZATION/${IMAGE}:$architecture"
-    docker rmi "$CI_REGISTRY_IMAGE/${IMAGE}:$VERSION"
+    docker rmi "$CI_REGISTRY_IMAGE/${IMAGE}:$TAG"
   else
-    docker tag "$CI_REGISTRY_IMAGE/$IMAGE:$VERSION" "$CI_REGISTRY_IMAGE/$IMAGE:latest"
+    docker tag "$CI_REGISTRY_IMAGE/$IMAGE:$TAG" "$CI_REGISTRY_IMAGE/$IMAGE:latest"
   fi
 
 done
@@ -26,7 +26,7 @@ if [ -n "$CI_JOB_TOKEN" ]; then
   IMAGES=$(docker images --format "{{.Repository}}:{{.Tag}}" | grep "$DOCKER_HUB_ORGANIZATION" | tr '\n' ' ')
   # shellcheck disable=SC2086
   docker manifest create "$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest" $IMAGES
-  docker manifest push -p "$DOCKER_HUB_REGISTRY/$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest"
+  docker manifest push -p "docker.io/$DOCKER_HUB_ORGANIZATION/${IMAGE}:latest"
   for img in $IMAGES; do
     docker rmi "$img"
   done

@@ -1,8 +1,6 @@
 variables:
     BASE_DISTROS: 'buster bullseye sid'
     ARCHS: 'amd64 arm64 armhf'
-    DOCKER_BUILDKIT: '1'
-    DOCKER_CLI_EXPERIMENTAL: 'enabled'
 
 stages:
     - build
@@ -37,11 +35,6 @@ build-docker-images:
     image: docker:latest
     services:
         - docker:dind
-    before_script:
-      - BUILDX_URL=$(docker run --rm python:rc-alpine sh -c "pip install --quiet lastversion && lastversion --assets --filter linux-amd64 buildx")
-      - mkdir -p $HOME/.docker/cli-plugins/
-      - wget -O $HOME/.docker/cli-plugins/docker-buildx $BUILDX_URL
-      - chmod a+x $HOME/.docker/cli-plugins/docker-buildx
     dependencies:
         - build-rootfs
     artifacts:
@@ -54,7 +47,9 @@ build-docker-images:
         apk add git bash tar pixz
         echo $CI_JOB_TOKEN | docker login -u $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
         for distro in $BASE_DISTROS; do
-            ./container-build.sh $distro
+          for arch in $ARCHS; do
+            ./container-build.sh $distro $arch
+          done
         done
 
 test-docker-images:
@@ -99,6 +94,10 @@ push-docker-images:
         set -e
         apk update
         apk add curl jq gawk
+        echo "$CI_JOB_TOKEN" | docker login -u "$CI_REGISTRY_USER" --password-stdin "$CI_REGISTRY"
+        if [ -n "$DOCKER_HUB_ACCESS_TOKEN" ]; then
+            echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
+        fi
         # Push images Docker Hub.
         for distro in $BASE_DISTROS; do
             ./docker-push.sh $distro
