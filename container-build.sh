@@ -23,9 +23,9 @@ TAG="$VERSION-${ARCHITECTURE}"
 
 export DOCKER_BUILDKIT=1
 docker build \
-  --platform=$platform \
-  --progress=plain --pull \
-  -t "$CI_REGISTRY_IMAGE/$IMAGE:$TAG" \
+  --platform "$platform" \
+  --progress plain --pull \
+  --tag "$CI_REGISTRY_IMAGE/$IMAGE:$TAG" \
   --build-arg TARBALL="$TARBALL" \
   --build-arg BUILD_DATE="$BUILD_DATE" \
   --build-arg VERSION="$VERSION" \
