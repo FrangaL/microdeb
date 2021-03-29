@@ -72,8 +72,8 @@ test-docker-images:
           esac
           for distro in $BASE_DISTROS; do
               . ./${architecture}-${distro}.conf || true
-              docker pull --platform $platform $CI_REGISTRY_IMAGE/$IMAGE:$VERSION
-              TEST_ARCH=$(docker run --rm $CI_REGISTRY_IMAGE/$IMAGE:$VERSION uname -m)
+              docker pull --platform $platform $CI_REGISTRY_IMAGE/$IMAGE:$TAG
+              TEST_ARCH=$(docker run --rm $CI_REGISTRY_IMAGE/$IMAGE:$TAG uname -m)
               if [[ "${machine}" == "$TEST_ARCH" ]]; then
                 echo "OK Architecture correct"
               else

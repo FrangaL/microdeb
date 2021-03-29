@@ -23,9 +23,8 @@ TAG="$VERSION-${ARCHITECTURE}"
 
 export DOCKER_BUILDKIT=1
 docker build \
-  --push \
   --platform=$platform \
-  --progress=plain \
+  --progress=plain --pull \
   -t "$CI_REGISTRY_IMAGE/$IMAGE:$TAG" \
   --build-arg TARBALL="$TARBALL" \
   --build-arg BUILD_DATE="$BUILD_DATE" \
@@ -34,6 +33,11 @@ docker build \
   --build-arg VCS_REF="$VCS_REF" \
   --build-arg RELEASE_DESCRIPTION="$RELEASE_DESCRIPTION" \
   .
+
+if [ -n "${CI_JOB_TOKEN:-}" ]; then
+    # Push the image so that subsequent jobs can fetch it
+    docker push "$CI_REGISTRY_IMAGE/$IMAGE:$TAG"
+fi
 
 cat >"${ARCHITECTURE}-$DISTRO.conf" <<END
 CI_REGISTRY_IMAGE="$CI_REGISTRY_IMAGE"
