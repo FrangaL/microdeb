@@ -21,6 +21,4 @@ LABEL org.opencontainers.image.created="$BUILD_DATE" \
 
 ADD $TARBALL /
 
-RUN echo 'debconf debconf/frontend select teletype' | debconf-set-selections
-
 CMD ["bash"]
