@@ -21,4 +21,8 @@ LABEL org.opencontainers.image.created="$BUILD_DATE" \
 
 ADD $TARBALL /
 
+RUN rm -f           \
+    /etc/machine-id \
+    /var/lib/dbus/machine-id
+    
 CMD ["bash"]
