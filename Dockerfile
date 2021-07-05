@@ -20,9 +20,5 @@ LABEL org.opencontainers.image.created="$BUILD_DATE" \
       org.opencontainers.image.authors="FrangaL <frangal@gmail.com>"
 
 ADD $TARBALL /
-
-RUN rm -f           \
-    /etc/machine-id \
-    /var/lib/dbus/machine-id
-    
+  
 CMD ["bash"]
