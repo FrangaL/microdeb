@@ -7,14 +7,14 @@ WORK_DIR="$ARCHITECTURE/$DISTRO"
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 
 rm -rf "$ARCHITECTURE" || true
-mkdir -p "$WORK_DIR"
+mkdir -p "$ARCHITECTURE"
 
 echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
 debootstrap --variant=minbase --components=main,contrib,non-free \
-      --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
+  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
