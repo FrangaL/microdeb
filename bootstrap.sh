@@ -7,7 +7,7 @@ WORK_DIR="$ARCHITECTURE/$DISTRO"
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 
 rm -rf "$ARCHITECTURE" || true
-mkdir -p "$ARCHITECTURE"
+mkdir -p "$WORK_DIR"
 
 echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
