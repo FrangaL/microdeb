@@ -13,8 +13,24 @@ echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-debootstrap --variant=minbase --components=main,contrib,non-free \
-  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR"
+# Retry command
+local n=1
+local max=5
+local delay=2
+while true; do
+  # shellcheck disable=SC2015
+  debootstrap --variant=minbase --components=main,contrib,non-free \
+    --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" && break || {
+    if [[ $n -lt $max ]]; then
+      ((n++))
+      log "Command failed. Attempt $n/$max " red
+      sleep $delay
+    else
+      log "The command has failed after $n attempts." yellow
+      break
+    fi
+  }
+done
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
