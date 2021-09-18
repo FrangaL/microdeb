@@ -13,24 +13,8 @@ echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-# Retry command
-retry=0
-while [ $retry -ge 0 ]; do
-    ret=0
-    debootstrap --variant=minbase --components=main,contrib,non-free \
+debootstrap --variant=minbase --components=main,contrib,non-free \
       --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || ret=$?
-    if [ $ret -eq 0 ]; then break; fi
-    echo "FAILURE! Let's look at the tail of debootstrap's log:"
-    tail "$WORK_DIR"/debootstrap/debootstrap.log || :
-    echo "----------------"
-    if [ $retry -eq 0 ]; then exit $ret; fi
-    retry=$((retry - 1))
-    sleep 1
-    echo "RETRYING debootstrap now!"
-    rm -fr "$ARCHITECTURE"
-done
-
-
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
