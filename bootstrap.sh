@@ -14,19 +14,17 @@ echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
 # Retry command
-local n=1
-local max=5
-local delay=2
+n=1; max=5; delay=2;
 while true; do
   # shellcheck disable=SC2015
   debootstrap --variant=minbase --components=main,contrib,non-free \
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" && break || {
     if [[ $n -lt $max ]]; then
       ((n++))
-      log "Command failed. Attempt $n/$max " red
+      echo "Debootstrap failed. Attempt $n/$max"
       sleep $delay
     else
-      log "The command has failed after $n attempts." yellow
+      echo "Debootstrap has failed after $n attempts."
       break
     fi
   }
