@@ -21,6 +21,7 @@ while true; do
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" && break || {
     if [[ $n -lt $max ]]; then
       ((n++))
+      rm -rf "$WORK_DIR"
       echo "Debootstrap failed. Attempt $n/$max"
       sleep $delay
     else
