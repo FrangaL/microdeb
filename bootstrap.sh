@@ -27,7 +27,7 @@ while [ $retry -ge 0 ]; do
     retry=$((retry - 1))
     sleep 1
     echo "RETRYING debootstrap now!"
-    rm -fr "$WORK_DIR"
+    rm -fr "$ARCHITECTURE"
 done
 
 
