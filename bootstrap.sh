@@ -14,22 +14,23 @@ echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
 # Retry command
-n=1; max=5; delay=2;
-while true; do
-  # shellcheck disable=SC2015
-  debootstrap --variant=minbase --components=main,contrib,non-free \
-    --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" && break || {
-    if [[ $n -lt $max ]]; then
-      ((n++))
-      rm -rf "$WORK_DIR"
-      echo "Debootstrap failed. Attempt $n/$max"
-      sleep $delay
-    else
-      echo "Debootstrap has failed after $n attempts."
-      break
-    fi
-  }
+retry=0
+while [ $retry -ge 0 ]; do
+    ret=0
+    debootstrap --variant=minbase --components=main,contrib,non-free \
+      --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || ret=$?
+    if [ $ret -eq 0 ]; then break; fi
+    echo "FAILURE! Let's look at the tail of debootstrap's log:"
+    tail "$WORK_DIR"/debootstrap/debootstrap.log || :
+    echo "----------------"
+    if [ $retry -eq 0 ]; then exit $ret; fi
+    retry=$((retry - 1))
+    sleep 1
+    echo "RETRYING debootstrap now!"
+    rm -fr "$WORK_DIR"
 done
+
+
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
