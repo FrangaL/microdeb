@@ -10,7 +10,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: debian:stable
+    image: microdeb:sid
     artifacts:
         paths:
             - "*.tar.xz"
