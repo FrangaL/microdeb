@@ -7,5 +7,4 @@ concurrent = 1
   [runners.docker]
     image = "debian:sid"
     cap_add = ["SYS_ADMIN", "MKNOD"]
-    devices = ["/dev/fuse"]
-    security_opt = ["apparmor:unconfined"]
+    privileged = true
