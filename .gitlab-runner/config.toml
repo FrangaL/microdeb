@@ -5,5 +5,7 @@ concurrent = 1
   limit = 1
   executor = "docker"
   [runners.docker]
-    image = "debian:testing"
+    image = "debian:sid"
     cap_add = ["SYS_ADMIN", "MKNOD"]
+    devices = ["/dev/fuse"]
+    security_opt = ["apparmor:unconfined"]
