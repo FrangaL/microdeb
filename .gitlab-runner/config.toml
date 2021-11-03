@@ -1,0 +1,9 @@
+concurrent = 1
+
+[[runners]]
+  name = "gitlab-ci runner on gitlab host"
+  limit = 1
+  executor = "docker"
+  [runners.docker]
+    image = "debian:testing"
+    cap_add = ["SYS_ADMIN", "MKNOD"]
