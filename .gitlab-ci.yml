@@ -10,7 +10,7 @@ stages:
 
 build-rootfs:
     stage: build
-    image: debian:sid
+    image: multiarch/debian-debootstrap
     artifacts:
         paths:
             - "*.tar.xz"
