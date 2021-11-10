@@ -13,9 +13,11 @@ echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-debootstrap --variant=minbase --components="main,contrib,non-free" --make-tarball=$DISTRO-$ARCHITECTURE.gz \
+debootstrap --variant=minbase --components="main,contrib,non-free" --make-tarball=$DISTRO-$ARCHITECTURE.tar \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
 
+debootstrap --variant=minbase --components="main,contrib,non-free" --unpack-tarball=$DISTRO-$ARCHITECTURE.tar \
+    --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" || true
 ls
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
