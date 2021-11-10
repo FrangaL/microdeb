@@ -25,7 +25,7 @@ debootstrap --foreign --components="main,contrib,non-free" --unpack-tarball=/bui
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" || true
 ls
 
-rootfs_chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
+rootfs_chroot /debootstrap/debootstrap --second-stage
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
