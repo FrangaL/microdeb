@@ -13,8 +13,8 @@ echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-debootstrap --variant=minbase --components=main,contrib,non-free \
-  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || cat /builds/frangal/microdeb/amd64/buster/debootstrap/debootstrap.log
+debootstrap --variant=minbase --components=main,contrib,non-free --extractor=ar \
+  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
