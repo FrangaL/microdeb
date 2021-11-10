@@ -24,6 +24,7 @@ build-rootfs:
           gnupg-agent qemu-user-static debootstrap libcap2-bin binfmt-support
         update-binfmts --enable
         uname -a && mount
+        mount -o remount,exec,dev /
         #sed -E -i 's;(proc/1/mountinfo);\1 || [ -e /.dockerenv ];' /usr/share/debootstrap/functions
         for distro in $BASE_DISTROS; do
           for arch in $ARCHS; do
