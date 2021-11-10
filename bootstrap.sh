@@ -13,7 +13,7 @@ echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-debootstrap --variant=minbase --components=main,contrib,non-free --extractor=ar \
+debootstrap --variant=minbase --components="main,contrib,non-free" --extractor=ar \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
