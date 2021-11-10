@@ -1,4 +1,5 @@
 concurrent = 1
+log_level = "warning"
 
 [[runners]]
   name = "gitlab-ci runner on gitlab host"
