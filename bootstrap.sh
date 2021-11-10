@@ -9,6 +9,11 @@ EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 rm -rf "$ARCHITECTURE" || true
 mkdir -p "$ARCHITECTURE"
 
+rootfs_chroot() {
+    PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
+        chroot "$WORK_DIR" "$@"
+}
+
 echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
@@ -19,6 +24,8 @@ pwd
 debootstrap --foreign --components="main,contrib,non-free" --unpack-tarball=/builds/frangal/microdeb/$DISTRO-$ARCHITECTURE.tar \
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" || true
 ls
+
+rootfs_chroot "$WORK_DIR"/debootstrap/debootstrap --second-stage
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
