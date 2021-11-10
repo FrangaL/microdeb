@@ -15,7 +15,7 @@ echo "========================================"
 
 debootstrap --variant=minbase --components="main,contrib,non-free" --make-tarball=$DISTRO-$ARCHITECTURE.tar \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
-
+pwd
 debootstrap --variant=minbase --components="main,contrib,non-free" --unpack-tarball=$DISTRO-$ARCHITECTURE.tar \
     --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" || true
 ls
