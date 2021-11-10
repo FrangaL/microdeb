@@ -21,6 +21,10 @@ echo "========================================"
 debootstrap --variant=minbase --components="main,contrib,non-free" --make-tarball=$DISTRO-$ARCHITECTURE.tar \
   --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
 
+for archive in "${WORK_DIR}"/var/cache/apt/archives/libc6*.deb; do
+  dpkg-deb --fsys-tarfile "$archive" >> $DISTRO-$ARCHITECTURE.tar
+done
+
 debootstrap --foreign --unpack-tarball=/builds/frangal/microdeb/$DISTRO-$ARCHITECTURE.tar "$DISTRO" "$WORK_DIR"
 
 rootfs_chroot /debootstrap/debootstrap --second-stage
