@@ -7,5 +7,4 @@ log_level = "warning"
   executor = "docker"
   [runners.docker]
     image = "debian:sid"
-    cap_add = ["SYS_ADMIN", "MKNOD"]
-    privileged = true
+    cap_add = ["MKNOD"]
