@@ -9,25 +9,12 @@ EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 rm -rf "$ARCHITECTURE" || true
 mkdir -p "$ARCHITECTURE"
 
-rootfs_chroot() {
-    PATH='/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin' \
-        chroot "$WORK_DIR" "$@"
-}
-
 echo "========================================"
 echo "Building rootfs Debian $DISTRO/$ARCHITECTURE"
 echo "========================================"
 
-debootstrap --variant=minbase --components="main,contrib,non-free" --make-tarball=$DISTRO-$ARCHITECTURE.tar \
-  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || true
-
-#for archive in "${WORK_DIR}"/var/cache/apt/archives/libc6*.deb; do
-#  dpkg-deb --fsys-tarfile "$archive" >> $DISTRO-$ARCHITECTURE.tar
-#done
-
-debootstrap --foreign --extractor=ar --unpack-tarball=/builds/frangal/microdeb/$DISTRO-$ARCHITECTURE.tar "$DISTRO" "$WORK_DIR"
-
-rootfs_chroot /debootstrap/debootstrap --second-stage
+debootstrap --variant=minbase --components="main,contrib,non-free" \
+  --exclude="$EXCLUDE" --arch="$ARCHITECTURE" "$DISTRO" "$WORK_DIR" "$MIRROR" || exit 1
 
 echo 'Acquire::Languages "none";' >"$WORK_DIR"/etc/apt/apt.conf.d/docker-no-languages
 echo 'force-unsafe-io' >"$WORK_DIR"/etc/dpkg/dpkg.cfg.d/docker-apt-speedup
@@ -80,4 +67,4 @@ find "$WORK_DIR"/usr/share/doc -empty -print0 | xargs -0 rmdir
 mkdir -p "$WORK_DIR"/var/lib/apt/lists/partial
 
 echo "Creating $ARCHITECTURE.$DISTRO.minbase.tar.xz ..."
-tar -I 'pixz -1' -C "$WORK_DIR" -pcf "$ARCHITECTURE"."$DISTRO".minbase.tar.xz .
+tar -I 'pixz -1' -C "$WORK_DIR" -pcf $ARCHITECTURE.$DISTRO.minbase.tar.xz .

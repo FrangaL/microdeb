@@ -1,0 +1,34 @@
+name: manifest
+on:
+  push:
+  schedule:
+    - cron: '10 2 * * 0'
+jobs:
+  manisert-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Login to DockerHub
+        uses: docker/login-action@v1
+        with:
+          logout: true
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+      - uses: actions/checkout@v2
+      - name: Build
+        run: |
+          sudo apt-get update
+          sudo apt-get install qemu-user-static binfmt-support
+          set -x
+          for distro in buster bullseye sid; do
+            images="--amend"
+            for arch in amd64 arm64 armhf; do
+              images+=" microdeb/$distro:$arch"
+              platform=$arch
+              [[ $arch == armhf ]] && platform="arm/7"
+              docker pull --platform linux/"$platform" microdeb/$distro:$arch
+            done
+            docker manifest create "microdeb/$distro":latest $images
+            docker manifest push --purge "microdeb/$distro":latest
+          done
