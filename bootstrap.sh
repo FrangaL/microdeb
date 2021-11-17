@@ -2,7 +2,7 @@
 
 DISTRO=$1
 ARCHITECTURE=$2
-MIRROR=${3:-http://ftp.debian.org/debian}
+MIRROR=${3:-http://deb.debian.org/debian}
 WORK_DIR="$ARCHITECTURE/$DISTRO"
 EXCLUDE="libext2fs2 e2fsprogs ncurses-bin"
 
