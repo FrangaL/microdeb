@@ -53,6 +53,7 @@ jobs:
             docker tag "${{ matrix.SUITE }}:$VERSION" "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
             docker push "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
   job2:
+    needs: job1
     manisert-push:
       runs-on: ubuntu-latest
       steps:
