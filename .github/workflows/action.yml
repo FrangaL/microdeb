@@ -20,13 +20,13 @@ jobs:
           - {SUITE: "sid", INCLUDE: "iproute2,wget"}
     steps:
       - name: Login to DockerHub
-      - uses: docker/login-action@v1
+        uses: docker/login-action@v1
         with:
           logout: true
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
       - name: Set up QEMU
-      - uses: docker/setup-qemu-action@v1
+        uses: docker/setup-qemu-action@v1
       - uses: actions/checkout@v2
       - name: Build
         run: |
