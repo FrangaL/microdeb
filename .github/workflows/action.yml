@@ -4,50 +4,80 @@ on:
   schedule:
     - cron: '10 1 * * 0'
 jobs:
-  bootstrap:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        DOCKER_REPO: [microdeb]
-        SUITE: ["buster", "bullseye", "sid"]
-        PLATFORM: ["linux/amd64", "linux/arm64", "linux/arm/7"]
-        include:
-          - {ARCH: amd64,   PLATFORM: "linux/amd64"}
-          - {ARCH: arm64,   PLATFORM: "linux/arm64"}
-          - {ARCH: armhf,   PLATFORM: "linux/arm/7"}
-          - {SUITE: "buster", INCLUDE: "iproute2,wget"}
-          - {SUITE: "bullseye", INCLUDE: "iproute2,wget"}
-          - {SUITE: "sid", INCLUDE: "iproute2,wget"}
-    steps:
-      - name: Login to DockerHub
-        uses: docker/login-action@v1
-        with:
-          logout: true
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v1
-      - uses: actions/checkout@v2
-      - name: Build
-        run: |
-          sudo apt-get -y update
-          sudo apt-get -y install dirmngr gnupg pixz wget ca-certificates curl \
-            gnupg-agent qemu-user-static debootstrap libcap2-bin binfmt-support git debian-archive-keyring
-          sudo update-binfmts --enable
-          sudo bash bootstrap.sh ${{ matrix.SUITE }} ${{ matrix.ARCH }}
-          export DOCKER_BUILDKIT=1
-          VERSION="$(date -u +"%Y-%m-%d")-${{ matrix.ARCH }}"
-          docker build \
-            --platform "${{ matrix.PLATFORM }}" \
-            --progress plain --pull \
-            --tag "${{ matrix.SUITE }}:$VERSION" \
-            --build-arg TARBALL="${{ matrix.ARCH }}.${{ matrix.SUITE }}.minbase.tar.xz" \
-            --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
-            --build-arg VERSION="$(date -u +"%Y-%m-%d")" \
-            --build-arg VCS_URL="$(git config --get remote.origin.url)" \
-            --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
-            --build-arg RELEASE_DESCRIPTION="${{ matrix.SUITE }}" \
-            .
-          DOCKER_REPO="microdeb"
-          docker tag "${{ matrix.SUITE }}:$VERSION" "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
-          docker push "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
+  job1:
+    bootstrap:
+      runs-on: ubuntu-latest
+      strategy:
+        matrix:
+          DOCKER_REPO: [microdeb]
+          SUITE: ["buster", "bullseye", "sid"]
+          PLATFORM: ["linux/amd64", "linux/arm64", "linux/arm/7"]
+          include:
+            - {ARCH: amd64,   PLATFORM: "linux/amd64"}
+            - {ARCH: arm64,   PLATFORM: "linux/arm64"}
+            - {ARCH: armhf,   PLATFORM: "linux/arm/7"}
+            - {SUITE: "buster", INCLUDE: "iproute2,wget"}
+            - {SUITE: "bullseye", INCLUDE: "iproute2,wget"}
+            - {SUITE: "sid", INCLUDE: "iproute2,wget"}
+      steps:
+        - name: Login to DockerHub
+          uses: docker/login-action@v1
+          with:
+            logout: true
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v1
+        - uses: actions/checkout@v2
+        - name: Build
+          run: |
+            sudo apt-get -y update
+            sudo apt-get -y install dirmngr gnupg pixz wget ca-certificates curl \
+              gnupg-agent qemu-user-static debootstrap libcap2-bin binfmt-support git debian-archive-keyring
+            sudo update-binfmts --enable
+            sudo bash bootstrap.sh ${{ matrix.SUITE }} ${{ matrix.ARCH }}
+            export DOCKER_BUILDKIT=1
+            VERSION="$(date -u +"%Y-%m-%d")-${{ matrix.ARCH }}"
+            docker build \
+              --platform "${{ matrix.PLATFORM }}" \
+              --progress plain --pull \
+              --tag "${{ matrix.SUITE }}:$VERSION" \
+              --build-arg TARBALL="${{ matrix.ARCH }}.${{ matrix.SUITE }}.minbase.tar.xz" \
+              --build-arg BUILD_DATE="$(date -u +"%Y-%m-%dT%H:%M:%SZ")" \
+              --build-arg VERSION="$(date -u +"%Y-%m-%d")" \
+              --build-arg VCS_URL="$(git config --get remote.origin.url)" \
+              --build-arg VCS_REF="$(git rev-parse --short HEAD)" \
+              --build-arg RELEASE_DESCRIPTION="${{ matrix.SUITE }}" \
+              .
+            DOCKER_REPO="microdeb"
+            docker tag "${{ matrix.SUITE }}:$VERSION" "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
+            docker push "$DOCKER_REPO/${{ matrix.SUITE }}:${{ matrix.ARCH }}"
+  job2:
+    manisert-push:
+      runs-on: ubuntu-latest
+      steps:
+        - name: Login to DockerHub
+          uses: docker/login-action@v1
+          with:
+            logout: true
+            username: ${{ secrets.DOCKERHUB_USERNAME }}
+            password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        - name: Set up QEMU
+          uses: docker/setup-qemu-action@v1
+        - uses: actions/checkout@v2
+        - name: Build
+          run: |
+            sudo apt-get update
+            sudo apt-get install qemu-user-static binfmt-support
+            set -x
+            for distro in buster bullseye sid; do
+              images="--amend"
+              for arch in amd64 arm64 armhf; do
+                images+=" microdeb/$distro:$arch"
+                platform=$arch
+                [[ $arch == armhf ]] && platform="arm/7"
+                docker pull --platform linux/"$platform" microdeb/$distro:$arch
+              done
+              docker manifest create "microdeb/$distro":latest $images
+              docker manifest push --purge "microdeb/$distro":latest
+            done
