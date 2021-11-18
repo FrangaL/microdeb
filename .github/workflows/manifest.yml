@@ -1,8 +1,9 @@
-name: manifest
+name: CI notify
 on:
-  push:
-  schedule:
-    - cron: '10 2 * * 0'
+  workflow_run:
+    workflows: ["Make microdeb"]
+    types:
+      - completed
 jobs:
   manisert-push:
     runs-on: ubuntu-latest
