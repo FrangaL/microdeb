@@ -1,6 +1,13 @@
 name: Make microdeb
 on:
   push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+    - '**.md'
   schedule:
     - cron: '10 1 * * 0'
 jobs:
