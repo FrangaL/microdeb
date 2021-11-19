@@ -1,8 +1,7 @@
 variables:
     BASE_DISTROS: 'buster bullseye sid'
     ARCHS: 'amd64 arm64 armhf'
-only:
-    - trigger
+
 stages:
     - test
     - push-readme
@@ -46,9 +45,9 @@ push-readme-hub:
         echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
         #
         # Clean tags Docker Hub.
-        for distro in $BASE_DISTROS; do
-          ./docker-cleanup.sh $distro
-        done
+        #for distro in $BASE_DISTROS; do
+        #  ./docker-cleanup.sh $distro
+        #done
         #
         # Update README and short description Docker Hub.
         # Short Description:
