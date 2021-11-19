@@ -54,7 +54,7 @@ push-readme-hub:
         buster_short="Debian Buster slim version for docker"
         bullseye_short="Debian Bullseye slim version for docker"
         sid_short="Debian Sid slim version for docker"
-        sed '18d' README.md
+        sed -i '18d' README.md
         for distro in $BASE_DISTROS; do
           case "$distro" in
             buster) SHORT=$buster_short ;;
