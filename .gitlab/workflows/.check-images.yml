@@ -34,6 +34,9 @@ test-docker-images:
         done
 
 push-readme-hub:
+    rules:
+    - changes:
+        - README.md
     stage: push-readme
     image: docker:latest
     services:
