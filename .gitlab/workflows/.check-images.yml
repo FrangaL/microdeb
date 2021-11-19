@@ -1,0 +1,71 @@
+variables:
+    BASE_DISTROS: 'buster bullseye sid'
+    ARCHS: 'amd64 arm64 armhf'
+
+stages:
+    - test
+    - push-readme
+
+test-docker-images:
+    stage: test
+    image: docker:latest
+    services:
+      - name: docker:dind
+        command: ["--experimental"]
+    script: |
+        set -e
+        docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+        for architecture in $ARCHS; do
+          case "${architecture}" in
+            amd64) platform="linux/amd64"; machine="x86_64" ;;
+            arm64) platform="linux/arm64"; machine="aarch64" ;;
+            armhf) platform="linux/arm/7"; machine="armv7l" ;;
+          esac
+          for distro in $BASE_DISTROS; do
+              docker pull --platform $platform microdeb/$distro:$architecture
+              TEST_ARCH=$(docker run --rm microdeb/$distro:$architecture uname -m)
+              if [[ "${machine}" == "$TEST_ARCH" ]]; then
+                echo "OK Architecture correct"
+              else
+                echo "Error: Architecture incorrect"
+                exit 1
+              fi
+          done
+        done
+
+push-readme-images:
+    stage: push-readme
+    image: docker:latest
+    services:
+        - docker:dind
+    script: |
+        set -e
+        apk update
+        apk add curl jq gawk
+        echo "$DOCKER_HUB_ACCESS_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin "$DOCKER_HUB_REGISTRY"
+        #
+        # Clean tags Docker Hub.
+        for distro in $BASE_DISTROS; do
+          ./docker-cleanup.sh $distro
+        done
+        #
+        # Update README and short description Docker Hub.
+        # Short Description:
+        buster_short="Debian Buster slim version for docker"
+        bullseye_short="Debian Bullseye slim version for docker"
+        sid_short="Debian Sid slim version for docker"
+        for distro in $BASE_DISTROS; do
+          case "$distro" in
+            buster) SHORT=$buster_short ;;
+            bullseye) SHORT=$bullseye_short ;;
+            sid) SHORT=$sid_short ;;
+          esac
+          docker run --rm \
+            -v "$(pwd)"/README.md:/data/README.md \
+            -e DOCKERHUB_USERNAME="$DOCKER_HUB_USER" \
+            -e DOCKERHUB_PASSWORD="$DOCKER_HUB_PASS" \
+            -e DOCKERHUB_REPO_PREFIX="$DOCKER_HUB_ORGANIZATION" \
+            -e DOCKERHUB_REPO_NAME="$distro" \
+            -e SHORT_DESCRIPTION="$SHORT" \
+            frangal/readme-dockerhub
+        done
