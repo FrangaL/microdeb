@@ -1,7 +1,8 @@
 variables:
     BASE_DISTROS: 'buster bullseye sid'
     ARCHS: 'amd64 arm64 armhf'
-
+only:
+    - trigger
 stages:
     - test
     - push-readme
@@ -33,7 +34,7 @@ test-docker-images:
           done
         done
 
-push-readme-images:
+push-readme-hub:
     stage: push-readme
     image: docker:latest
     services:
@@ -54,6 +55,7 @@ push-readme-images:
         buster_short="Debian Buster slim version for docker"
         bullseye_short="Debian Bullseye slim version for docker"
         sid_short="Debian Sid slim version for docker"
+        sed '18d' README.md
         for distro in $BASE_DISTROS; do
           case "$distro" in
             buster) SHORT=$buster_short ;;
