@@ -13,6 +13,3 @@ You can use the image directly, e.g.
 `docker run --rm -it microdeb/bullseye bash`
 
 `docker run --rm -it microdeb/sid bash`
-
-
-https://hub.docker.com/u/microdeb
